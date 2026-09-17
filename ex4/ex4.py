@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
-
+//23BIT059
 class NoisyImageDenoiser:
     """Loads a grayscale image, adds Gaussian noise, and compares
     a custom Gaussian smoothing implementation against OpenCV's."""
