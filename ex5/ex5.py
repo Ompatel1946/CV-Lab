@@ -1,63 +1,58 @@
+#experiment-5
+
+#23BIT059
+
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
+image = cv2.imread("D:\CV LAB\ex5\image.png", cv2.IMREAD_GRAYSCALE)
 
-def sobel_operator(gray):
-    # Sobel kernels
-    Gx = np.array([
-        [-1, 0, 1],
-        [-2, 0, 2],
-        [-1, 0, 1]
-    ])
+plt.imshow(image, cmap="gray")
+plt.title("Original Image")
+plt.axis("off")
+plt.show()
 
-    Gy = np.array([
-        [-1, -2, -1],
-        [ 0,  0,  0],
-        [ 1,  2,  1]
-    ])
+def sobel_filter(img):
+    img = img.astype(np.float64)
 
-    # Create output image
-    rows, cols = gray.shape
-    output = np.zeros((rows, cols), dtype=np.float32)
+    kx = np.array([[-1, 0, 1],
+                   [-2, 0, 2],
+                   [-1, 0, 1]], dtype=np.float64)
+    ky = np.array([[-1, -2, -1],
+                   [ 0,  0,  0],
+                   [ 1,  2,  1]], dtype=np.float64)
 
-    # Apply kernels manually
-    for i in range(1, rows - 1):
-        for j in range(1, cols - 1):
+    h, w = img.shape
+    padded = np.pad(img, 1, mode="constant")
 
-            # Take 3x3 region
-            region = gray[i-1:i+2, j-1:j+2]
+    gx = np.zeros((h, w), dtype=np.float64)
+    gy = np.zeros((h, w), dtype=np.float64)
 
-            # Calculate gradients
-            x = np.sum(Gx * region)
-            y = np.sum(Gy * region)
+    for i in range(h):
+        for j in range(w):
+            region = padded[i:i+3, j:j+3]
+            gx[i, j] = np.sum(region * kx)
+            gy[i, j] = np.sum(region * ky)
 
-            # Gradient magnitude
-            value = np.sqrt(x**2 + y**2)
+    edge_image = np.sqrt(gx**2 + gy**2)
+    edge_image = (edge_image / edge_image.max() * 255).astype(np.uint8)
 
-            output[i, j] = value
+    return gx, gy, edge_image
 
-    # Convert to 8-bit
-    output = np.clip(output, 0, 255).astype(np.uint8)
+gx, gy, edge_image = sobel_filter(image)
 
-    return output
+plt.imshow(np.abs(gx), cmap="gray")
+plt.title("Sobel X")
+plt.axis("off")
+plt.show()
 
+plt.imshow(np.abs(gy), cmap="gray")
+plt.title("Sobel Y")
+plt.axis("off")
+plt.show()
 
-# Read image
-image = cv2.imread("D:\CV LAB\ex5\image.png")
-
-# Convert to grayscale
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-# Use our manually created Sobel function
-sobel = sobel_operator(gray)
-
-# Resize for small output
-small_original = cv2.resize(image, (500, 350))
-small_sobel = cv2.resize(sobel, (500, 350))
-
-# Display
-cv2.imshow("Original Image", small_original)
-cv2.imshow("Manual Sobel Edge Detection", small_sobel)
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+plt.imshow(edge_image, cmap="gray")
+plt.title("Final Sobel Edge Image")
+plt.axis("off")
+plt.show()
